@@ -2,24 +2,53 @@ package main
 
 import (
 	"fmt"
+	"log"
 
-	"github.com/cli/go-gh/v2/pkg/api"
+	"github.com/underwoo16/gh-diffstack/gh"
+	"github.com/underwoo16/gh-diffstack/git"
 )
 
 func main() {
-	fmt.Println("hi world, this is the gh-diffstack extension!")
-	client, err := api.DefaultRESTClient()
+	gitService := git.NewGitService()
+	latestCommit := gitService.LatestCommit()
+	fmt.Println(latestCommit)
+
+	branchName := gitService.BuildBranchNameFromCommit(latestCommit)
+	fmt.Println(branchName)
+
+	err := gitService.CreateBranch(branchName)
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatal(err)
 	}
-	response := struct {Login string}{}
-	err = client.Get("user", &response)
+
+	err = gitService.Switch(branchName)
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatal(err)
 	}
-	fmt.Printf("running as %s\n", response.Login)
+
+	err = gitService.CherryPick(latestCommit)
+	if err != nil {
+		// TODO: abort chery-pick and switch back to main
+		log.Fatal(err)
+	}
+
+	err = gitService.Push()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// create pr
+	ghService := gh.NewGitHubService()
+	err = ghService.CreatePullRequest(branchName, "main")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	//switch back to main
+	err = gitService.Switch("main")
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 // For more examples of using go-gh, see:
