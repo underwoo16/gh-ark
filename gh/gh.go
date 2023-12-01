@@ -1,9 +1,9 @@
 package gh
 
 import (
+	"context"
 	"encoding/json"
 	"log"
-	"os"
 
 	"github.com/cli/go-gh/v2"
 )
@@ -44,10 +44,7 @@ func (g *gitHubService) GetPullRequests() []PullRequest {
 	return pullRequests
 }
 
-// TODO: fill pr title and body automatically
-func (g *gitHubService) CreatePullRequest(baseBranch string, headBranch string) error {
-	out, _, err := gh.Exec("pr", "create", "-B", baseBranch, "-H", headBranch)
-
-	os.Stdout.Write(out.Bytes())
-	return err
+// TODO: fill pr title and body automatically?
+func (g *gitHubService) CreatePullRequest() error {
+	return gh.ExecInteractive(context.Background(), "pr", "create")
 }

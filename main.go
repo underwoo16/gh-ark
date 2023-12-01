@@ -9,6 +9,7 @@ import (
 )
 
 func main() {
+	fmt.Println("Starting...")
 	gitService := git.NewGitService()
 	latestCommit := gitService.LatestCommit()
 	fmt.Println(latestCommit)
@@ -43,7 +44,7 @@ func main() {
 	fmt.Println("Push succeeded, creating PR...")
 	// create pr
 	ghService := gh.NewGitHubService()
-	err = ghService.CreatePullRequest(branchName, "main")
+	err = ghService.CreatePullRequest()
 	if err != nil {
 		fmt.Println("PR creation failed...")
 		log.Fatal(err)
