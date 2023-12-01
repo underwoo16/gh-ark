@@ -10,7 +10,7 @@ import (
 
 type GitHubService interface {
 	GetPullRequests() []PullRequest
-	CreatePullRequest(baseBranch string, headBranch string)
+	CreatePullRequest() error
 }
 
 type PullRequest struct {

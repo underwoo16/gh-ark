@@ -7,6 +7,16 @@ import (
 	"strings"
 )
 
+type GitService interface {
+	LatestCommit() string
+	RevParse(thing string) string
+	CreateBranch(branchName string) error
+	Switch(branch string) error
+	CherryPick(commit string) error
+	Push() error
+	BuildBranchNameFromCommit(commitSha string) string
+}
+
 type gitService struct{}
 
 func NewGitService() *gitService {
