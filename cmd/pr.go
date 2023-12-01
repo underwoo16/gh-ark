@@ -47,8 +47,9 @@ func createPullRequest(gitService git.GitService, ghService gh.GitHubService) er
 
 	err = gitService.CherryPick(latestCommit)
 	if err != nil {
-		// TODO: abort chery-pick and switch back to main
-		fmt.Println("Cherry-pick failed, need to --quit...")
+		fmt.Println("Cherry-pick failed, aborting...")
+		gitService.AbortCherryPick()
+		gitService.Switch("main")
 		log.Fatal(err)
 	}
 

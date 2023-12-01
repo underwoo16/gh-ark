@@ -15,6 +15,7 @@ type GitService interface {
 	CherryPick(commit string) error
 	Push() error
 	BuildBranchNameFromCommit(commitSha string) string
+	AbortCherryPick() error
 }
 
 type gitService struct{}
@@ -50,6 +51,10 @@ func (g *gitService) CherryPick(commit string) error {
 	cmd.Stdout = os.Stdout
 
 	return cmd.Run()
+}
+
+func (g *gitService) AbortCherryPick() error {
+	return exec.Command("git", "cherry-pick", "--abort").Run()
 }
 
 func (g *gitService) Push() error {
