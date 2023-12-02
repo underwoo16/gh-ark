@@ -93,3 +93,7 @@ func (g *gitService) RebaseInteractiveAutosquash(commitSha string) error {
 	cmd.Env = append(cmd.Env, "GIT_SEQUENCE_EDITOR=true")
 	return cmd.Run()
 }
+
+func (g *gitService) LogFromMain() ([]byte, error) {
+	return exec.Command("git", "log", "--oneline", "--no-decorate", "origin/main..HEAD").Output()
+}
