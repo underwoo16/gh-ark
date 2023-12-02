@@ -51,7 +51,6 @@ func (g *gitHubService) GetPullRequests() []PullRequest {
 	return pullRequests
 }
 
-// TODO: fill pr title and body automatically?
 func (g *gitHubService) CreatePullRequest() error {
 	return gh.ExecInteractive(context.Background(), "pr", "create")
 }

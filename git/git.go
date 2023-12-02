@@ -19,12 +19,22 @@ type GitService interface {
 	AbortCherryPick() error
 	AmendCommitWithFixup(commitSha string) error
 	RebaseInteractiveAutosquash(commitSha string) error
+	CurrentBranch() string
 }
 
 type gitService struct{}
 
 func NewGitService() *gitService {
 	return &gitService{}
+}
+
+func (g *gitService) CurrentBranch() string {
+	out, err := exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD").Output()
+	if err != nil {
+		log.Fatal(err)
+	}
+	result := strings.TrimSpace(string(out))
+	return result
 }
 
 func (g *gitService) LatestCommit() string {

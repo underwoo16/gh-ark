@@ -21,7 +21,6 @@ var prCmd = &cobra.Command{
 
 func init() {
 	// TODO: add flag to specify branch to target PR instead of defaulting to main
-	// TODO: don't assume "trunk" is main - we could be working on a different branch
 }
 
 func runPrCmd() error {
@@ -34,7 +33,7 @@ func runPrCmd() error {
 
 // TODO: check for existing PR before creating new one
 func createPullRequest(gitService git.GitService, ghService gh.GitHubService) error {
-	trunk := "main"
+	trunk := gitService.CurrentBranch()
 	latestCommit := gitService.LatestCommit()
 	fmt.Println(latestCommit)
 

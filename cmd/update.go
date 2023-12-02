@@ -36,7 +36,7 @@ func runUpdateCmd(args []string) error {
 }
 
 func updatePullRequest(args []string, gitService git.GitService, ghService gh.GitHubService) error {
-	trunk := "main"
+	trunk := gitService.CurrentBranch()
 	latestCommit := gitService.LatestCommit()
 	pullRequestCommit := args[0]
 
@@ -51,7 +51,7 @@ func updatePullRequest(args []string, gitService git.GitService, ghService gh.Gi
 	if err != nil {
 		fmt.Println("Cherry-pick failed, aborting...")
 		gitService.AbortCherryPick()
-		gitService.Switch("main")
+		gitService.Switch(trunk)
 		return err
 	}
 
