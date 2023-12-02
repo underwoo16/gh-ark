@@ -16,17 +16,14 @@ var prCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runPrCmd()
 	},
-	Example: `  gh-slack read <slack-permalink>
-  gh-slack read -i <issue-url> <slack-permalink>`,
+	Example: `gh-diffstack pr`,
 }
 
 func init() {
-	// TODO: add flags
+	// TODO: add flag to specify branch to target PR instead of defaulting to main
+	// TODO: don't assume "trunk" is main - we could be working on a different branch
 }
 
-// TODO: add flag to update PR instead of creating a new one
-// TODO: add flag to specify branch to target PR instead of defaulting to main
-// TODO: don't assume "trunk" is main
 func runPrCmd() error {
 	fmt.Println("Creating PR from current commit...")
 
@@ -35,6 +32,7 @@ func runPrCmd() error {
 	return createPullRequest(gitService, ghService)
 }
 
+// TODO: check for existing PR before creating new one
 func createPullRequest(gitService git.GitService, ghService gh.GitHubService) error {
 	trunk := "main"
 	latestCommit := gitService.LatestCommit()
@@ -64,7 +62,7 @@ func createPullRequest(gitService git.GitService, ghService gh.GitHubService) er
 
 	fmt.Println("Cherry-pick succeeded, pushing to remote...")
 
-	err = gitService.Push()
+	err = gitService.PushNewBranch()
 	if err != nil {
 		fmt.Println("Push failed...")
 		log.Fatal(err)

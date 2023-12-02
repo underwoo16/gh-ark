@@ -14,8 +14,11 @@ type GitService interface {
 	Switch(branch string) error
 	CherryPick(commit string) error
 	Push() error
+	PushNewBranch() error
 	BuildBranchNameFromCommit(commitSha string) string
 	AbortCherryPick() error
+	AmendCommitWithFixup(commitSha string) error
+	RebaseInteractiveAutosquash(commitSha string) error
 }
 
 type gitService struct{}
@@ -58,6 +61,10 @@ func (g *gitService) AbortCherryPick() error {
 }
 
 func (g *gitService) Push() error {
+	return exec.Command("git", "push").Run()
+}
+
+func (g *gitService) PushNewBranch() error {
 	return exec.Command("git", "-c", "push.default=current", "push").Run()
 }
 
@@ -72,4 +79,17 @@ func (g *gitService) BuildBranchNameFromCommit(commitSha string) string {
 
 func (g *gitService) BuildBranchNameFromLastCommit() string {
 	return g.BuildBranchNameFromCommit("HEAD")
+}
+
+func (g *gitService) AmendCommitWithFixup(commitSha string) error {
+	fixupArg := "--fixup=" + commitSha
+	return exec.Command("git", "commit", "--amend", fixupArg).Run()
+}
+
+func (g *gitService) RebaseInteractiveAutosquash(commitSha string) error {
+	commitArg := commitSha + "^"
+	cmd := exec.Command("git", "rebase", "--interactive", "--autosquash", commitArg)
+	cmd.Env = os.Environ()
+	cmd.Env = append(cmd.Env, "GIT_SEQUENCE_EDITOR=true")
+	return cmd.Run()
 }

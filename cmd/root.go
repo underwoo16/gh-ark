@@ -27,7 +27,7 @@ func Execute() error {
 
 func init() {
 	rootCmd.AddCommand(prCmd)
+	rootCmd.AddCommand(updateCmd)
 	// TODO: add command to show stack status (branch name, commit, open PRs, etc.)
-	// TODO: add command to edit from given commit
-	// TODO: add command to rebuild stack
+	// TODO: add command to rebuild stack from trunk (for new codespace ex.)
 }
