@@ -20,6 +20,13 @@ var prCmd = &cobra.Command{
   gh-slack read -i <issue-url> <slack-permalink>`,
 }
 
+func init() {
+	// TODO: add flags
+}
+
+// TODO: add flag to update PR instead of creating a new one
+// TODO: add flag to specify branch to target PR instead of defaulting to main
+// TODO: don't assume "trunk" is main
 func runPrCmd() error {
 	fmt.Println("Creating PR from current commit...")
 
@@ -29,6 +36,7 @@ func runPrCmd() error {
 }
 
 func createPullRequest(gitService git.GitService, ghService gh.GitHubService) error {
+	trunk := "main"
 	latestCommit := gitService.LatestCommit()
 	fmt.Println(latestCommit)
 
@@ -46,14 +54,16 @@ func createPullRequest(gitService git.GitService, ghService gh.GitHubService) er
 	}
 
 	err = gitService.CherryPick(latestCommit)
+
 	if err != nil {
 		fmt.Println("Cherry-pick failed, aborting...")
 		gitService.AbortCherryPick()
-		gitService.Switch("main")
+		gitService.Switch(trunk)
 		log.Fatal(err)
 	}
 
 	fmt.Println("Cherry-pick succeeded, pushing to remote...")
+
 	err = gitService.Push()
 	if err != nil {
 		fmt.Println("Push failed...")
@@ -61,18 +71,18 @@ func createPullRequest(gitService git.GitService, ghService gh.GitHubService) er
 	}
 
 	fmt.Println("Push succeeded, creating PR...")
-	// create pr
+
 	err = ghService.CreatePullRequest()
 	if err != nil {
 		fmt.Println("PR creation failed...")
 		log.Fatal(err)
 	}
 
-	fmt.Println("PR created, switching back to main...")
-	//switch back to main
-	err = gitService.Switch("main")
+	fmt.Printf("PR created, switching back to %s...\n", trunk)
+
+	err = gitService.Switch(trunk)
 	if err != nil {
-		fmt.Println("Switching back to main failed...")
+		fmt.Printf("Switching back to %s failed...\n", trunk)
 		log.Fatal(err)
 	}
 
