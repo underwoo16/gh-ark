@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/underwoo16/gh-diffstack/gh"
 	"github.com/underwoo16/gh-diffstack/git"
+	"github.com/underwoo16/gh-diffstack/utils"
 )
 
 // showCmd represents the show command
@@ -70,18 +71,17 @@ func runShowCmd(cmd *cobra.Command, args []string) {
 	}
 
 	sb := strings.Builder{}
-	for idx, stack := range stacks {
-		marker := circle
-		if idx == 0 {
-			marker = dot
-		}
+	sb.WriteString(fmt.Sprintf("%s %s\n%s\n", dot, "head", vertical))
+	for _, stack := range stacks {
+		sb.WriteString(circle + " ")
 
-		sb.WriteString(fmt.Sprintf("%s %s (%s)\n", marker, stack.branchName, stack.sha))
-
-		sb.WriteString(vertical)
+		bn := utils.Yellow(stack.branchName)
+		s := utils.Green(fmt.Sprintf(" (%s)", stack.sha))
+		sb.WriteString(bn + s + "\n" + vertical)
 
 		if stack.prUrl != "" {
-			sb.WriteString(fmt.Sprintf("  - %s\n%s", stack.prUrl, vertical))
+			pr := utils.Blue(stack.prUrl)
+			sb.WriteString(fmt.Sprintf("- %s\n%s", pr, vertical))
 		}
 
 		sb.WriteString("\n")
@@ -90,7 +90,6 @@ func runShowCmd(cmd *cobra.Command, args []string) {
 	sb.WriteString(fmt.Sprintf("%s %s\n", trunk, "trunk"))
 
 	fmt.Print(sb.String())
-
 }
 
 var vertical = "│"
