@@ -29,25 +29,19 @@ Includes the following:
 // TODO: add colors
 func runShowCmd(cmd *cobra.Command, args []string) {
 	gitService := git.NewGitService()
-	out, err := gitService.LogFromMain()
+
+	logs, err := gitService.LogFromMainFormatted()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	logString := string(out)
-	logs := strings.FieldsFunc(logString, func(r rune) bool {
-		return r == '\n'
-	})
-
 	stacks := []*diffStack{}
 	for _, log := range logs {
 		parts := strings.Fields(log)
-
 		sha := strings.TrimSpace(parts[0])
 
 		commitMessage := strings.Join(parts[1:], " ")
 
-		// build diffstack
 		diffStack := diffStack{
 			sha:           sha,
 			commitMessage: commitMessage,

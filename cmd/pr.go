@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/underwoo16/gh-diffstack/gh"
@@ -19,8 +20,12 @@ var prCmd = &cobra.Command{
 	Example: `gh-diffstack pr`,
 }
 
+// var branch string
+var list bool
+
 func init() {
-	// TODO: add flag to specify branch to target PR instead of defaulting to main
+	// prCmd.Flags().StringVarP(&branch, "branch", "b", "main", "Branch to target PR")
+	prCmd.Flags().BoolVarP(&list, "list", "l", false, "Select commit from list")
 }
 
 func runPrCmd() error {
@@ -28,16 +33,33 @@ func runPrCmd() error {
 
 	gitService := git.NewGitService()
 	ghService := gh.NewGitHubService()
-	return createPullRequest(gitService, ghService)
+
+	if list {
+		return createPullRequestList(gitService, ghService)
+	}
+
+	return createPullRequestLatest(gitService, ghService)
+}
+
+// TODO: error handling
+func createPullRequestList(gitService git.GitService, ghService gh.GitHubService) error {
+	commits, _ := gitService.LogFromMainFormatted()
+	choice, _ := ghService.Prompt("Select commit to create PR from", commits[0], commits)
+
+	commit := strings.Fields(commits[choice])[0]
+	return createPullRequest(commit, gitService, ghService)
+}
+
+func createPullRequestLatest(gitService git.GitService, ghService gh.GitHubService) error {
+	latestCommit := gitService.LatestCommit()
+	return createPullRequest(latestCommit, gitService, ghService)
 }
 
 // TODO: check for existing PR before creating new one
-func createPullRequest(gitService git.GitService, ghService gh.GitHubService) error {
+func createPullRequest(commit string, gitService git.GitService, ghService gh.GitHubService) error {
 	trunk := gitService.CurrentBranch()
-	latestCommit := gitService.LatestCommit()
-	fmt.Println(latestCommit)
 
-	branchName := gitService.BuildBranchNameFromCommit(latestCommit)
+	branchName := gitService.BuildBranchNameFromCommit(commit)
 	fmt.Println(branchName)
 
 	err := gitService.CreateBranch(branchName)
@@ -50,7 +72,7 @@ func createPullRequest(gitService git.GitService, ghService gh.GitHubService) er
 		log.Fatal(err)
 	}
 
-	err = gitService.CherryPick(latestCommit)
+	err = gitService.CherryPick(commit)
 
 	if err != nil {
 		fmt.Println("Cherry-pick failed, aborting...")

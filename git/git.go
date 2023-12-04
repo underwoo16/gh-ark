@@ -20,11 +20,12 @@ type GitService interface {
 	AmendCommitWithFixup(commitSha string) error
 	RebaseInteractiveAutosquash(commitSha string) error
 	CurrentBranch() string
+	LogFromMainFormatted() ([]string, error)
 }
 
 type gitService struct{}
 
-func NewGitService() *gitService {
+func NewGitService() GitService {
 	return &gitService{}
 }
 
@@ -104,6 +105,23 @@ func (g *gitService) RebaseInteractiveAutosquash(commitSha string) error {
 	return cmd.Run()
 }
 
-func (g *gitService) LogFromMain() ([]byte, error) {
-	return exec.Command("git", "log", "--oneline", "--no-decorate", "origin/main..HEAD").Output()
+func (g *gitService) LogFromMainFormatted() ([]string, error) {
+	out, err := exec.Command("git", "log", "--oneline", "--no-decorate", "origin/main..HEAD").Output()
+	if err != nil {
+		return nil, err
+	}
+
+	outputString := string(out)
+	logs := strings.FieldsFunc(outputString, func(r rune) bool {
+		return r == '\n'
+	})
+
+	for i, log := range logs {
+		parts := strings.Fields(log)
+		commitMessage := strings.Join(parts[1:], " ")
+		log = parts[0] + " - " + commitMessage
+		logs[i] = strings.TrimSpace(log)
+	}
+
+	return logs, nil
 }
