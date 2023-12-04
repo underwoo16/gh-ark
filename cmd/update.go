@@ -9,7 +9,7 @@ import (
 )
 
 var updateCmd = &cobra.Command{
-	Use:   "update",
+	Use:   "upr",
 	Short: "Update an existing PR with the latest commit",
 	Long:  `Updates a pull request on GitHub with the latest commit and squashes the latest commit into the commit associated with the existing PR`,
 	Args:  cobra.MinimumNArgs(1),
@@ -23,6 +23,7 @@ func init() {
 	// TODO: add flags
 	// TODO: add ability to target PR by number
 	// TODO: add ability to target PR by branch name
+	// TODO: add flag to select commit sha from list
 	// TODO: add flag to squash commit in PR
 	// TODO: if no arg or flag, prompt user to select PR to update
 }
