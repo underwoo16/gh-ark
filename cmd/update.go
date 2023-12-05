@@ -20,11 +20,14 @@ var updateCmd = &cobra.Command{
 	Example: `gh-diffstack update $commit_sha`,
 }
 
+var updateList bool
+
 func init() {
 	// TODO: add flags
 	// TODO: add ability to target PR by number
 	// TODO: add ability to target PR by branch name
 	// TODO: add flag to select commit sha from list
+	updateCmd.Flags().BoolVarP(&updateList, "list", "l", false, "Select commit from list")
 	// TODO: add flag to squash commit in PR
 	// TODO: if no arg or flag, prompt user to select PR to update
 }

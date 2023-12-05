@@ -14,7 +14,7 @@ import (
 var prCmd = &cobra.Command{
 	Use:   "npr",
 	Short: "Create PR from latest commit",
-	Long:  `Creates a pull request on GitHub which contains the latest commit and targets origin/main`,
+	Long:  `Creates a pull request on GitHub which contains the latest commit and targets origin/master`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runPrCmd()
 	},

@@ -52,7 +52,7 @@ func (g *gitService) RevParse(thing string) string {
 }
 
 func (g *gitService) CreateBranch(branchName string) error {
-	return exec.Command("git", "branch", "--no-track", branchName, "origin/main").Run()
+	return exec.Command("git", "branch", "--no-track", branchName, "origin/master").Run()
 }
 
 func (g *gitService) Switch(branch string) error {
@@ -102,7 +102,7 @@ func (g *gitService) RebaseInteractiveAutosquash(commitSha string) error {
 }
 
 func (g *gitService) LogFromMainFormatted() ([]string, error) {
-	out, err := exec.Command("git", "log", "--oneline", "--no-decorate", "origin/main..HEAD").Output()
+	out, err := exec.Command("git", "log", "--oneline", "--no-decorate", "origin/master..HEAD").Output()
 	if err != nil {
 		return nil, err
 	}
