@@ -26,7 +26,6 @@ Includes the following:
 }
 
 // TODO: cleanup
-// TODO: add colors
 func runShowCmd(cmd *cobra.Command, args []string) {
 	gitService := git.NewGitService()
 
