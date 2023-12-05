@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/underwoo16/gh-diffstack/gh"
 	"github.com/underwoo16/gh-diffstack/git"
+	"github.com/underwoo16/gh-diffstack/utils"
 )
 
 var updateCmd = &cobra.Command{
@@ -29,8 +30,6 @@ func init() {
 }
 
 func runUpdateCmd(args []string) error {
-	fmt.Println("Updating PR with latest commit...")
-
 	gitService := git.NewGitService()
 	ghService := gh.NewGitHubService()
 	return updatePullRequest(args, gitService, ghService)
@@ -42,6 +41,14 @@ func updatePullRequest(args []string, gitService git.GitService, ghService gh.Gi
 	pullRequestCommit := args[0]
 
 	branchName := gitService.BuildBranchNameFromCommit(pullRequestCommit)
+
+	pullRequest := ghService.GetPullRequestForBranch(branchName)
+
+	if pullRequest == nil {
+		return fmt.Errorf("no pull request found for stack%s", branchName)
+	}
+
+	fmt.Printf("Updating pull request:\n%s <- %s\n%s\n", utils.Green(pullRequest.BaseRefName), utils.Yellow(pullRequest.HeadRefName), utils.Blue(pullRequest.Url))
 
 	err := gitService.Switch(branchName)
 	if err != nil {
@@ -75,6 +82,8 @@ func updatePullRequest(args []string, gitService git.GitService, ghService gh.Gi
 	if err != nil {
 		return err
 	}
+
+	fmt.Printf("Pull request succesfully updated.\n")
 
 	return nil
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/underwoo16/gh-diffstack/gh"
 	"github.com/underwoo16/gh-diffstack/git"
+	"github.com/underwoo16/gh-diffstack/utils"
 )
 
 var prCmd = &cobra.Command{
@@ -61,7 +62,7 @@ func createPullRequest(commit string, gitService git.GitService, ghService gh.Gi
 	trunk := gitService.CurrentBranch()
 
 	branchName := gitService.BuildBranchNameFromCommit(commit)
-	fmt.Println(branchName)
+	fmt.Printf("Creating branch %s\n", utils.Yellow(branchName))
 
 	err := gitService.CreateBranch(branchName)
 	if err != nil {
@@ -72,6 +73,8 @@ func createPullRequest(commit string, gitService git.GitService, ghService gh.Gi
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	fmt.Printf("Cherry-picking %s\n", utils.Green(commit))
 
 	err = gitService.CherryPick(commit)
 
@@ -90,7 +93,7 @@ func createPullRequest(commit string, gitService git.GitService, ghService gh.Gi
 		log.Fatal(err)
 	}
 
-	fmt.Println("Push succeeded, creating PR...")
+	fmt.Println("Push succeeded, creating pull request...")
 
 	err = ghService.CreatePullRequest()
 	if err != nil {
@@ -98,7 +101,7 @@ func createPullRequest(commit string, gitService git.GitService, ghService gh.Gi
 		log.Fatal(err)
 	}
 
-	fmt.Printf("PR created, switching back to %s...\n", trunk)
+	fmt.Printf("%s switching back to %s\n", utils.Green("Pull request created"), utils.Yellow(trunk))
 
 	err = gitService.Switch(trunk)
 	if err != nil {

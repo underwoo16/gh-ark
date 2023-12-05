@@ -60,11 +60,7 @@ func (g *gitService) Switch(branch string) error {
 }
 
 func (g *gitService) CherryPick(commit string) error {
-	cmd := exec.Command("git", "cherry-pick", commit)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-
-	return cmd.Run()
+	return exec.Command("git", "cherry-pick", commit).Run()
 }
 
 func (g *gitService) AbortCherryPick() error {

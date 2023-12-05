@@ -12,6 +12,7 @@ import (
 
 type GitHubService interface {
 	GetPullRequests() []PullRequest
+	GetPullRequestForBranch(branch string) *PullRequest
 	CreatePullRequest() error
 	Prompt(promptText string, defaultVal string, values []string) (int, error)
 }
@@ -28,7 +29,7 @@ type gitHubService struct{}
 
 // TODO: Add func to test if gh is installed
 
-func NewGitHubService() *gitHubService {
+func NewGitHubService() GitHubService {
 	return &gitHubService{}
 }
 
@@ -49,6 +50,27 @@ func (g *gitHubService) GetPullRequests() []PullRequest {
 	}
 
 	return pullRequests
+}
+
+func (g *gitHubService) GetPullRequestForBranch(branch string) *PullRequest {
+	out, _, err := gh.Exec("pr", "list", "--author", "@me", "-H", branch, "--json", "number,baseRefName,headRefName,url")
+	if err != nil {
+		log.Fatal(err)
+		return nil
+	}
+
+	pulls := []PullRequest{}
+	err = json.Unmarshal(out.Bytes(), &pulls)
+	if err != nil {
+		log.Fatal(err)
+		return nil
+	}
+
+	if len(pulls) == 0 {
+		return nil
+	}
+
+	return &pulls[0]
 }
 
 func (g *gitHubService) CreatePullRequest() error {
