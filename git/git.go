@@ -1,6 +1,7 @@
 package git
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -20,7 +21,10 @@ type GitService interface {
 	AmendCommitWithFixup(commitSha string) error
 	RebaseInteractiveAutosquash(commitSha string) error
 	CurrentBranch() string
-	LogFromMainFormatted() ([]string, error)
+	LogFrom(branch string) ([]string, error)
+	LogFromMainOrMaster() ([]string, error)
+	LocalBranchExists(branch string) bool
+	RemoteBranchExists(branch string) bool
 }
 
 type gitService struct{}
@@ -51,8 +55,27 @@ func (g *gitService) RevParse(thing string) string {
 	return result
 }
 
+func (g *gitService) LocalBranchExists(branch string) bool {
+	_, err := exec.Command("git", "rev-parse", "--verify", branch).Output()
+	return err == nil
+}
+
+func (g *gitService) RemoteBranchExists(branch string) bool {
+	_, err := exec.Command("git", "ls-remote", "--exit-code", "origin", branch).Output()
+	return err == nil
+}
+
+func (g *gitService) GetTrunk() string {
+	trunk := "master"
+	if !g.LocalBranchExists(trunk) {
+		trunk = "main"
+	}
+	return trunk
+}
+
 func (g *gitService) CreateBranch(branchName string) error {
-	return exec.Command("git", "branch", "--no-track", branchName, "origin/master").Run()
+	trunkArg := fmt.Sprintf("origin/%s", g.GetTrunk())
+	return exec.Command("git", "branch", "--no-track", branchName, trunkArg).Run()
 }
 
 func (g *gitService) Switch(branch string) error {
@@ -101,8 +124,13 @@ func (g *gitService) RebaseInteractiveAutosquash(commitSha string) error {
 	return cmd.Run()
 }
 
-func (g *gitService) LogFromMainFormatted() ([]string, error) {
-	out, err := exec.Command("git", "log", "--oneline", "--no-decorate", "origin/master..HEAD").Output()
+func (g *gitService) LogFromMainOrMaster() ([]string, error) {
+	return g.LogFrom(g.GetTrunk())
+}
+
+func (g *gitService) LogFrom(branch string) ([]string, error) {
+	branchArg := fmt.Sprintf("origin/%s..HEAD", branch)
+	out, err := exec.Command("git", "log", "--oneline", "--no-decorate", branchArg).Output()
 	if err != nil {
 		return nil, err
 	}

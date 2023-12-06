@@ -53,7 +53,7 @@ func (g *gitHubService) GetPullRequests() []PullRequest {
 }
 
 func (g *gitHubService) GetPullRequestForBranch(branch string) *PullRequest {
-	out, _, err := gh.Exec("pr", "list", "--author", "@me", "-H", branch, "--json", "number,baseRefName,headRefName,url")
+	out, _, err := gh.Exec("pr", "list", "-H", branch, "--json", "number,baseRefName,headRefName,url")
 	if err != nil {
 		log.Fatal(err)
 		return nil

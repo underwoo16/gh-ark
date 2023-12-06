@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/underwoo16/gh-diffstack/gh"
@@ -13,21 +14,21 @@ var updateCmd = &cobra.Command{
 	Use:   "upr",
 	Short: "Update an existing PR with the latest commit",
 	Long:  `Updates a pull request on GitHub with the latest commit and squashes the latest commit into the commit associated with the existing PR`,
-	Args:  cobra.MinimumNArgs(1),
+	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runUpdateCmd(args)
 	},
 	Example: `gh-diffstack update $commit_sha`,
 }
 
-var updateList bool
+var updatePrList bool
 
 func init() {
 	// TODO: add flags
 	// TODO: add ability to target PR by number
 	// TODO: add ability to target PR by branch name
 	// TODO: add flag to select commit sha from list
-	updateCmd.Flags().BoolVarP(&updateList, "list", "l", false, "Select commit from list")
+	updateCmd.Flags().BoolVarP(&updatePrList, "list", "l", false, "Select commit from list")
 	// TODO: add flag to squash commit in PR
 	// TODO: if no arg or flag, prompt user to select PR to update
 }
@@ -35,20 +36,31 @@ func init() {
 func runUpdateCmd(args []string) error {
 	gitService := git.NewGitService()
 	ghService := gh.NewGitHubService()
-	return updatePullRequest(args, gitService, ghService)
+
+	if updatePrList {
+		return updatePullRequestList(gitService, ghService)
+	}
+
+	return updatePullRequest(args[0], gitService, ghService)
 }
 
-func updatePullRequest(args []string, gitService git.GitService, ghService gh.GitHubService) error {
+func updatePullRequestList(gitService git.GitService, ghService gh.GitHubService) error {
+	commits, _ := gitService.LogFromMainOrMaster()
+	choice, _ := ghService.Prompt("Select commit to update PR with", commits[0], commits)
+	commit := strings.Fields(commits[choice])[0]
+	return updatePullRequest(commit, gitService, ghService)
+}
+
+func updatePullRequest(pullRequestCommit string, gitService git.GitService, ghService gh.GitHubService) error {
 	trunk := gitService.CurrentBranch()
 	latestCommit := gitService.LatestCommit()
-	pullRequestCommit := args[0]
 
 	branchName := gitService.BuildBranchNameFromCommit(pullRequestCommit)
 
 	pullRequest := ghService.GetPullRequestForBranch(branchName)
 
 	if pullRequest == nil {
-		return fmt.Errorf("no pull request found for stack%s", branchName)
+		return fmt.Errorf("no pull request found for stack: %s", branchName)
 	}
 
 	fmt.Printf("Updating pull request:\n%s <- %s\n%s\n", utils.Green(pullRequest.BaseRefName), utils.Yellow(pullRequest.HeadRefName), utils.Blue(pullRequest.Url))

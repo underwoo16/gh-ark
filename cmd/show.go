@@ -29,7 +29,7 @@ Includes the following:
 func runShowCmd(cmd *cobra.Command, args []string) {
 	gitService := git.NewGitService()
 
-	logs, err := gitService.LogFromMainFormatted()
+	logs, err := gitService.LogFromMainOrMaster()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -64,12 +64,16 @@ func runShowCmd(cmd *cobra.Command, args []string) {
 	}
 
 	sb := strings.Builder{}
-	sb.WriteString(fmt.Sprintf("%s %s\n%s\n", dot, "head", vertical))
+	sb.WriteString(fmt.Sprintf("%s %s\n%s\n", head, "head *", vertical))
 	for _, stack := range stacks {
-		sb.WriteString(circle + " ")
+		if stack.prUrl != "" {
+			sb.WriteString(dot + " ")
+		} else {
+			sb.WriteString(circle + " ")
+		}
 
-		bn := utils.Yellow(stack.branchName)
-		s := utils.Green(fmt.Sprintf(" (%s)", stack.sha))
+		bn := utils.Green(stack.branchName)
+		s := utils.Yellow(fmt.Sprintf(" (%s)", stack.sha))
 		sb.WriteString(bn + s + "\n" + vertical)
 
 		if stack.prUrl != "" {
@@ -87,7 +91,8 @@ func runShowCmd(cmd *cobra.Command, args []string) {
 
 var vertical = "│"
 var trunk = "┴"
-var circle = "◌"
+var head = "┬"
+var circle = "◯"
 var dot = "●"
 
 type diffStack struct {
