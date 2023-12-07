@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/cli/cli/v2/pkg/iostreams"
 	"github.com/spf13/cobra"
 	"github.com/underwoo16/gh-diffstack/gh"
 	"github.com/underwoo16/gh-diffstack/git"
@@ -56,15 +57,21 @@ func updatePullRequest(pullRequestCommit string, gitService git.GitService, ghSe
 	latestCommit := gitService.LatestCommit()
 
 	branchName := gitService.BuildBranchNameFromCommit(pullRequestCommit)
+	fmt.Println("Attempting to update pull request for branch:", branchName)
 
+	io := iostreams.System()
+	io.StartProgressIndicator()
 	pullRequest := ghService.GetPullRequestForBranch(branchName)
 
 	if pullRequest == nil {
 		return fmt.Errorf("no pull request found for stack: %s", branchName)
 	}
 
+	io.StopProgressIndicator()
+
 	fmt.Printf("Updating pull request:\n%s <- %s\n%s\n", utils.Green(pullRequest.BaseRefName), utils.Yellow(pullRequest.HeadRefName), utils.Blue(pullRequest.Url))
 
+	io.StartProgressIndicator()
 	err := gitService.Switch(branchName)
 	if err != nil {
 		return err
@@ -98,6 +105,7 @@ func updatePullRequest(pullRequestCommit string, gitService git.GitService, ghSe
 		return err
 	}
 
+	io.StopProgressIndicator()
 	fmt.Printf("Pull request succesfully updated.\n")
 
 	return nil

@@ -5,6 +5,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/cli/cli/v2/pkg/iostreams"
 	"github.com/spf13/cobra"
 	"github.com/underwoo16/gh-diffstack/gh"
 	"github.com/underwoo16/gh-diffstack/git"
@@ -51,6 +52,10 @@ func runShowCmd(cmd *cobra.Command, args []string) {
 
 	ghService := gh.NewGitHubService()
 
+	fmt.Println("Fetching pull requests")
+	io := iostreams.System()
+	io.StartProgressIndicator()
+
 	// TODO: cache pull requests when created
 	// only call api if no cache found
 	pullRequests := ghService.GetPullRequests()
@@ -86,6 +91,7 @@ func runShowCmd(cmd *cobra.Command, args []string) {
 
 	sb.WriteString(fmt.Sprintf("%s %s\n", trunk, "trunk"))
 
+	io.StopProgressIndicator()
 	fmt.Print(sb.String())
 }
 

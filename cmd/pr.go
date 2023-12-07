@@ -5,6 +5,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/cli/cli/v2/pkg/iostreams"
 	"github.com/spf13/cobra"
 	"github.com/underwoo16/gh-diffstack/gh"
 	"github.com/underwoo16/gh-diffstack/git"
@@ -56,7 +57,10 @@ func createPullRequestLatest(gitService git.GitService, ghService gh.GitHubServi
 
 // TODO: check for existing PR before creating new one
 func createPullRequest(commit string, gitService git.GitService, ghService gh.GitHubService) error {
-	fmt.Printf("Creating PR from commit %s...\n", utils.Yellow(commit))
+	fmt.Printf("Creating PR from commit %s\n", utils.Yellow(commit))
+
+	io := iostreams.System()
+	io.StartProgressIndicator()
 
 	trunk := gitService.CurrentBranch()
 
@@ -89,6 +93,8 @@ func createPullRequest(commit string, gitService git.GitService, ghService gh.Gi
 		fmt.Println("Push failed...")
 		log.Fatal(err)
 	}
+
+	io.StopProgressIndicator()
 
 	// TODO: handle when user cancels - error code 2?
 	err = ghService.CreatePullRequest()
