@@ -71,11 +71,7 @@ func runShowCmd(cmd *cobra.Command, args []string) {
 	sb := strings.Builder{}
 	sb.WriteString(fmt.Sprintf("%s %s\n%s\n", head, "head *", vertical))
 	for _, stack := range stacks {
-		if stack.prUrl != "" {
-			sb.WriteString(dot + " ")
-		} else {
-			sb.WriteString(circle + " ")
-		}
+		sb.WriteString(branch + " ")
 
 		bn := utils.Green(stack.branchName)
 		s := utils.Yellow(fmt.Sprintf(" (%s)", stack.sha))
@@ -98,8 +94,7 @@ func runShowCmd(cmd *cobra.Command, args []string) {
 var vertical = "│"
 var trunk = "┴"
 var head = "┬"
-var circle = "◯"
-var dot = "●"
+var branch = "├"
 
 type diffStack struct {
 	sha           string
