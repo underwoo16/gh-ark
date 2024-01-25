@@ -25,6 +25,7 @@ type GitService interface {
 	LogFromMainOrMaster() ([]string, error)
 	LocalBranchExists(branch string) bool
 	RemoteBranchExists(branch string) bool
+	Pull() error
 }
 
 type gitService struct{}
@@ -148,4 +149,8 @@ func (g *gitService) LogFrom(branch string) ([]string, error) {
 	}
 
 	return logs, nil
+}
+
+func (g *gitService) Pull() error {
+	return exec.Command("git", "pull").Run()
 }

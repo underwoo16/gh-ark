@@ -58,6 +58,7 @@ func runShowCmd(cmd *cobra.Command, args []string) {
 
 	// TODO: cache pull requests when created
 	// only call api if no cache found
+	// TODO: get prs one by one by branch name - async? channel?
 	pullRequests := ghService.GetPullRequests()
 
 	for _, stack := range stacks {

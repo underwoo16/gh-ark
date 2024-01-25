@@ -52,6 +52,7 @@ func updatePullRequestList(gitService git.GitService, ghService gh.GitHubService
 	return updatePullRequest(commit, gitService, ghService)
 }
 
+// TODO: allow partial commit sha
 func updatePullRequest(pullRequestCommit string, gitService git.GitService, ghService gh.GitHubService) error {
 	trunk := gitService.CurrentBranch()
 	latestCommit := gitService.LatestCommit()
@@ -73,6 +74,13 @@ func updatePullRequest(pullRequestCommit string, gitService git.GitService, ghSe
 
 	io.StartProgressIndicator()
 	err := gitService.Switch(branchName)
+	if err != nil {
+		return err
+	}
+
+	// TODO: check diff between origin/$branchName
+	// only pull if there are changes
+	err = gitService.Pull()
 	if err != nil {
 		return err
 	}
