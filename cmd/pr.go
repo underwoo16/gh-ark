@@ -66,6 +66,7 @@ func createPullRequest(commit string, gitService git.GitService, ghService gh.Gi
 
 	branchName := gitService.BuildBranchNameFromCommit(commit)
 
+	// TODO: check if branch exists on remote before creating
 	if !gitService.LocalBranchExists(branchName) {
 		err := gitService.CreateBranch(branchName)
 		if err != nil {
@@ -79,8 +80,15 @@ func createPullRequest(commit string, gitService git.GitService, ghService gh.Gi
 		log.Fatal(err)
 	}
 
-	err = gitService.CherryPick(commit)
+	// TODO: check diff between origin/$branchName
+	// only pull if there are changes
+	err = gitService.Pull()
+	if err != nil {
+		gitService.Switch(trunk)
+		log.Fatal(err)
+	}
 
+	err = gitService.CherryPick(commit)
 	if err != nil {
 		fmt.Println("Cherry-pick failed, aborting...")
 		gitService.AbortCherryPick()
