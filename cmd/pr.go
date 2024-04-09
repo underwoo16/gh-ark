@@ -13,29 +13,29 @@ import (
 )
 
 var prCmd = &cobra.Command{
-	Use:   "npr",
+	Use:   "diff",
 	Short: "Create PR from latest commit",
 	Long:  `Creates a pull request on GitHub which contains the latest commit and targets origin/master`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return runPrCmd()
+		return runDiffCmd()
 	},
-	Example: `gh-diffstack npr
-gh-diffstack npr -l`,
+	Example: `gh-diffstack diff
+gh-diffstack diff -l`,
 }
 
 // var branch string
-var newPrList bool
+var newDiffList bool
 
 func init() {
 	// prCmd.Flags().StringVarP(&branch, "branch", "b", "main", "Branch to target PR")
-	prCmd.Flags().BoolVarP(&newPrList, "list", "l", false, "Select commit from list")
+	prCmd.Flags().BoolVarP(&newDiffList, "list", "l", false, "Select commit from list")
 }
 
-func runPrCmd() error {
+func runDiffCmd() error {
 	gitService := git.NewGitService()
 	ghService := gh.NewGitHubService()
 
-	if newPrList {
+	if newDiffList {
 		return createPullRequestList(gitService, ghService)
 	}
 
