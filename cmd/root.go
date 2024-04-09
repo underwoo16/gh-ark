@@ -10,10 +10,10 @@ import (
 var rootCmd = &cobra.Command{
 	SilenceUsage:  true,
 	SilenceErrors: true,
-	Use:           "gh-diffstack [command]",
+	Use:           "gh ark [command]",
 	Short:         "Command line tool for managing stacked diffs.",
 	Long:          `A command line tool for managing pull requests of stacked diffs through gh cli`,
-	Example:       `gh-diffstack pr`,
+	Example:       `gh ark diff`,
 }
 
 func Execute() error {

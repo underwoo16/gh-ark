@@ -1,4 +1,4 @@
-module github.com/underwoo16/gh-diffstack
+module github.com/underwoo16/gh-ark
 
 go 1.21.4
 
