@@ -7,9 +7,9 @@ import (
 
 	"github.com/cli/cli/v2/pkg/iostreams"
 	"github.com/spf13/cobra"
-	"github.com/underwoo16/gh-diffstack/gh"
-	"github.com/underwoo16/gh-diffstack/git"
-	"github.com/underwoo16/gh-diffstack/utils"
+	"github.com/underwoo16/gh-ark/gh"
+	"github.com/underwoo16/gh-ark/git"
+	"github.com/underwoo16/gh-ark/utils"
 )
 
 var diffCmd = &cobra.Command{
@@ -19,8 +19,8 @@ var diffCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runDiffCmd()
 	},
-	Example: `gh-diffstack diff
-gh-diffstack diff -l`,
+	Example: `gh ark diff
+gh ark diff -l`,
 }
 
 // var branch string

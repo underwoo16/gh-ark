@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/underwoo16/gh-diffstack/cmd"
+	"github.com/underwoo16/gh-ark/cmd"
 )
 
 func main() {

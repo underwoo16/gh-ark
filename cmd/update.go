@@ -6,9 +6,9 @@ import (
 
 	"github.com/cli/cli/v2/pkg/iostreams"
 	"github.com/spf13/cobra"
-	"github.com/underwoo16/gh-diffstack/gh"
-	"github.com/underwoo16/gh-diffstack/git"
-	"github.com/underwoo16/gh-diffstack/utils"
+	"github.com/underwoo16/gh-ark/gh"
+	"github.com/underwoo16/gh-ark/git"
+	"github.com/underwoo16/gh-ark/utils"
 )
 
 var updateCmd = &cobra.Command{
@@ -19,7 +19,7 @@ var updateCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runUpdateCmd(args)
 	},
-	Example: `gh-diffstack update $commit_sha`,
+	Example: `gh ark update $commit_sha`,
 }
 
 var updatePrList bool
