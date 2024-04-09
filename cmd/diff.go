@@ -12,7 +12,7 @@ import (
 	"github.com/underwoo16/gh-diffstack/utils"
 )
 
-var prCmd = &cobra.Command{
+var diffCmd = &cobra.Command{
 	Use:   "diff",
 	Short: "Create PR from latest commit",
 	Long:  `Creates a pull request on GitHub which contains the latest commit and targets origin/master`,
@@ -28,7 +28,7 @@ var newDiffList bool
 
 func init() {
 	// prCmd.Flags().StringVarP(&branch, "branch", "b", "main", "Branch to target PR")
-	prCmd.Flags().BoolVarP(&newDiffList, "list", "l", false, "Select commit from list")
+	diffCmd.Flags().BoolVarP(&newDiffList, "list", "l", false, "Select commit from list")
 }
 
 func runDiffCmd() error {
@@ -36,13 +36,13 @@ func runDiffCmd() error {
 	ghService := gh.NewGitHubService()
 
 	if newDiffList {
-		return createPullRequestList(gitService, ghService)
+		return createPullRequestFromList(gitService, ghService)
 	}
 
-	return createPullRequestLatest(gitService, ghService)
+	return createPullRequestFromLatest(gitService, ghService)
 }
 
-func createPullRequestList(gitService git.GitService, ghService gh.GitHubService) error {
+func createPullRequestFromList(gitService git.GitService, ghService gh.GitHubService) error {
 	commits, _ := gitService.LogFromMainOrMaster()
 	choice, _ := ghService.Prompt("Select commit to create PR from", commits[0], commits)
 
@@ -50,7 +50,7 @@ func createPullRequestList(gitService git.GitService, ghService gh.GitHubService
 	return createPullRequest(commit, gitService, ghService)
 }
 
-func createPullRequestLatest(gitService git.GitService, ghService gh.GitHubService) error {
+func createPullRequestFromLatest(gitService git.GitService, ghService gh.GitHubService) error {
 	latestCommit := gitService.LatestCommit()
 	return createPullRequest(latestCommit, gitService, ghService)
 }
