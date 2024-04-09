@@ -26,7 +26,7 @@ func Execute() error {
 }
 
 func init() {
-	rootCmd.AddCommand(prCmd)
+	rootCmd.AddCommand(diffCmd)
 	rootCmd.AddCommand(updateCmd)
 	rootCmd.AddCommand(showCmd)
 	// TODO: add command to rebuild stack from trunk (for new codespace ex.)
