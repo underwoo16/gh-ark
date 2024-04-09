@@ -12,7 +12,7 @@ import (
 	"github.com/underwoo16/gh-diffstack/utils"
 )
 
-var prCmd = &cobra.Command{
+var diffCmd = &cobra.Command{
 	Use:   "diff",
 	Short: "Create PR from latest commit",
 	Long:  `Creates a pull request on GitHub which contains the latest commit and targets origin/master`,
@@ -27,8 +27,8 @@ gh-diffstack diff -l`,
 var newDiffList bool
 
 func init() {
-	// prCmd.Flags().StringVarP(&branch, "branch", "b", "main", "Branch to target PR")
-	prCmd.Flags().BoolVarP(&newDiffList, "list", "l", false, "Select commit from list")
+	// diffCmd.Flags().StringVarP(&branch, "branch", "b", "main", "Branch to target PR")
+	diffCmd.Flags().BoolVarP(&newDiffList, "list", "l", false, "Select commit from list")
 }
 
 func runDiffCmd() error {
