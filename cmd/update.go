@@ -42,29 +42,29 @@ func runUpdateCmd(args []string) error {
 		return updatePullRequestList(gitService, ghService)
 	}
 
-	return updatePullRequest(args[0], gitService, ghService)
+	latestCommit := gitService.LatestCommit()
+	return updatePullRequest(latestCommit, args[0], gitService, ghService)
 }
 
 func updatePullRequestList(gitService git.GitService, ghService gh.GitHubService) error {
 	commits, _ := gitService.LogFromMainOrMaster()
-	choice, _ := ghService.Prompt("Select commit to update PR with", commits[0], commits)
-	commit := strings.Fields(commits[choice])[0]
-	return updatePullRequest(commit, gitService, ghService)
+	choice, _ := ghService.Prompt("Select commit to update PR for", commits[0], commits)
+	prCommit := strings.Fields(commits[choice])[0]
+
+	latestCommit := gitService.LatestCommit()
+	return updatePullRequest(latestCommit, prCommit, gitService, ghService)
 }
 
-func updatePullRequest(pullRequestCommit string, gitService git.GitService, ghService gh.GitHubService) error {
+func updatePullRequest(commit string, pullRequestCommit string, gitService git.GitService, ghService gh.GitHubService) error {
 	trunk := gitService.CurrentBranch()
-	latestCommit := gitService.LatestCommit()
-
 	branchName := gitService.BuildBranchNameFromCommit(pullRequestCommit)
-	fmt.Println("Attempting to update pull request for branch:", branchName)
 
 	io := iostreams.System()
 	io.StartProgressIndicator()
 	pullRequest := ghService.GetPullRequestForBranch(branchName)
 
 	if pullRequest == nil {
-		return fmt.Errorf("no pull request found for stack: %s", branchName)
+		return fmt.Errorf("no pull request found for: %s", branchName)
 	}
 
 	io.StopProgressIndicator()
@@ -77,7 +77,7 @@ func updatePullRequest(pullRequestCommit string, gitService git.GitService, ghSe
 		return err
 	}
 
-	err = gitService.CherryPick(latestCommit)
+	err = gitService.CherryPick(commit)
 	if err != nil {
 		fmt.Println("Cherry-pick failed, aborting...")
 		gitService.AbortCherryPick()

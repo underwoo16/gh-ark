@@ -23,11 +23,9 @@ var diffCmd = &cobra.Command{
 gh ark diff -l`,
 }
 
-// var branch string
 var newDiffList bool
 
 func init() {
-	// prCmd.Flags().StringVarP(&branch, "branch", "b", "main", "Branch to target PR")
 	diffCmd.Flags().BoolVarP(&newDiffList, "list", "l", false, "Select commit from list")
 }
 
@@ -55,15 +53,29 @@ func createPullRequestFromLatest(gitService git.GitService, ghService gh.GitHubS
 	return createPullRequest(latestCommit, gitService, ghService)
 }
 
-// TODO: check for existing PR before creating new one
 func createPullRequest(commit string, gitService git.GitService, ghService gh.GitHubService) error {
-	fmt.Printf("Creating PR from commit %s\n", utils.Yellow(commit))
-
 	io := iostreams.System()
 	io.StartProgressIndicator()
 
+	previousCommit, err := gitService.PreviousCommit()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if previousCommit != commit {
+		previousBranch := gitService.BuildBranchNameFromCommit(previousCommit)
+
+		existingPR := ghService.GetPullRequestForBranch(previousBranch)
+		if existingPR != nil {
+			io.StopProgressIndicator()
+			fmt.Printf("Updating PR (%s) with commit %s\n", utils.Yellow(previousBranch), utils.Yellow(commit))
+			return updatePullRequest(commit, previousCommit, gitService, ghService)
+		}
+	}
+
 	trunk := gitService.CurrentBranch()
 
+	fmt.Printf("Creating PR from commit %s\n", utils.Yellow(commit))
 	branchName := gitService.BuildBranchNameFromCommit(commit)
 
 	if !gitService.LocalBranchExists(branchName) {
@@ -74,7 +86,7 @@ func createPullRequest(commit string, gitService git.GitService, ghService gh.Gi
 	}
 
 	// TODO: stash changes or use worktree?
-	err := gitService.Switch(branchName)
+	err = gitService.Switch(branchName)
 	if err != nil {
 		log.Fatal(err)
 	}
